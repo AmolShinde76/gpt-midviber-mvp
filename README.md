@@ -45,9 +45,9 @@ chmod +x start.sh
 
 ## Access the Application
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
+- **Frontend**: http://88.222.241.107
+- **Backend API**: http://88.222.241.107:8000
+- **API Documentation**: http://88.222.241.107:8000/docs
 
 ## Features
 

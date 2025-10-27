@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from search_context_simple import ask, client
 import io
 import os
@@ -35,7 +35,8 @@ class QueryRequest(BaseModel):
     question: str
     document_id: str
 
-    @validator('question')
+    @field_validator('question')
+    @classmethod
     def question_must_not_be_empty(cls, v):
         if not v or not v.strip():
             raise ValueError('Question cannot be empty')
@@ -43,7 +44,8 @@ class QueryRequest(BaseModel):
             raise ValueError('Question too long (max 2000 characters)')
         return v.strip()
 
-    @validator('document_id')
+    @field_validator('document_id')
+    @classmethod
     def document_id_must_be_valid(cls, v):
         if not v or not v.strip():
             raise ValueError('Document ID cannot be empty')
