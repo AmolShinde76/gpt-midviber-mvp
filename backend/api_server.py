@@ -112,6 +112,11 @@ async def ask_question(request: QueryRequest):
         logger.error(f"Error processing ask request: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint to verify if the API is running"""
+    return {"status": "API is running", "message": "Medical Document Assistant API is up and running"}
+
 @app.get("/pdf/{file_id}")
 async def get_pdf(file_id: str):
     """Serve PDF files securely"""
