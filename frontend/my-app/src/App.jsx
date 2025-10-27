@@ -70,7 +70,7 @@ const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebar
 
   const handleReferenceClick = (fileId) => {
     // Open the PDF in a new tab using the backend API
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
     window.open(`${apiBaseUrl}/pdf/${fileId}`, '_blank');
   };
 
@@ -111,7 +111,7 @@ const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebar
     setResults(prev => [...prev, tempResult]);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
       const response = await fetch(`${apiBaseUrl}/ask`, {
         method: 'POST',
         headers: {
@@ -207,7 +207,7 @@ const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebar
     setResults(prev => [...prev, tempResult]);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
       const response = await fetch(`${apiBaseUrl}/ask`, {
         method: 'POST',
         headers: {
@@ -469,7 +469,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
     fetch(`${apiBaseUrl}/journals`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch journals');
