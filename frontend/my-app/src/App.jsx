@@ -502,8 +502,8 @@ export default function App() {
       root.style.setProperty('--text-primary', '#212529');
       root.style.setProperty('--text-secondary', '#6c757d');
       root.style.setProperty('--text-muted', '#adb5bd');
-      root.style.setProperty('--accent', '#007bff');        // Blue accent
-      root.style.setProperty('--accent-hover', '#0056b3');  // Darker shade of blue
+      root.style.setProperty('--accent', 'rgb(45, 50, 121)');        // Custom accent
+      root.style.setProperty('--accent-hover', 'rgb(37, 40, 97)');  // Darker shade
       root.style.setProperty('--border', '#dee2e6');
       root.style.setProperty('--shadow', 'rgba(0, 0, 0, 0.1)');
     }
