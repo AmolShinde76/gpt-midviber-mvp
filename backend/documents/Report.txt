@@ -1,0 +1,1 @@
+if sum of multiple documents have 300 page  then if we search in any document the total tokens are 18000.  it to high.

@@ -1,0 +1,11 @@
+result DEBUG: Full OpenAI response object: SyncCursorPage[Message]
+(data=[Message(id='msg_xp6E3RZpoxRkruF18YV41YPD', assistant_id='asst_ChPouF1RvyDbhToK65PYGjIH', attachments=[], completed_at=None, content=[TextContentBlock(text=Text(annotations=[FileCitationAnnotation(end_index=401, 
+
+file_citation=FileCitation(file_id='file-HKVYN4qp29bB6nCKh9fab5'), start_index=389, text='【4:0†source】', type='file_citation')], 
+value='Amlodipine should be taken once daily, ideally at the same time every day. It can be taken with or without food. The typical starting dose is 5 mg, while in elderly or frail patients, a starting dose of 2.5 mg is recommended. The maximum dose is 10 mg once daily. It is important to note that Amlodipine is not intended for the acute relief of chest pain and should not be stopped suddenly【4:0†source】. \n\nPage no: 1'), type='text')],
+
+ created_at=1758209903, incomplete_at=None, incomplete_details=None, metadata={}, object='thread.message', role='assistant', run_id='run_0VayIMYBCAZXlnA9fnp7pkWi', status=None, thread_id='thread_TmAHJSHvQgh70zK2atQFyikn'), Message(id='msg_JDkqBNsZqMT1HmKuM58tHH6S', assistant_id=None, 
+
+attachments=[Attachment(file_id='file-N3jMSqG19Sc6pUB8a2C1sV', tools=[AttachmentToolAssistantToolsFileSearchTypeOnly(type='file_search')]), Attachment(file_id='file-HKVYN4qp29bB6nCKh9fab5', tools=[AttachmentToolAssistantToolsFileSearchTypeOnly(type='file_search')])], completed_at=None, content=[TextContentBlock(text=Text(annotations=[], value='when to take Amlodipine?'), type='text')], created_at=1758209894, incomplete_at=None, incomplete_details=None, metadata={}, object='thread.message', role='user', run_id=None, status=None, thread_id='thread_TmAHJSHvQgh70zK2atQFyikn')], 
+
+has_more=False, object='list', first_id='msg_xp6E3RZpoxRkruF18YV41YPD', last_id='msg_JDkqBNsZqMT1HmKuM58tHH6S')
