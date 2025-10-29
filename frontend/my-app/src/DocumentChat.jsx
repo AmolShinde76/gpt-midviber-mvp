@@ -3,7 +3,7 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.js?url';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 
-export default function DocumentChat({ selectedDoc, children, pageNumber = 1 }) {
+export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pdfOnlyMobile = false }) {
   const [splitRatio, setSplitRatio] = useState(50); // Percentage for PDF section (50% = equal split)
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
@@ -77,23 +77,42 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1 }) 
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
+  // If mobile and pdfOnlyMobile, show only PDF section
+  if (isMobile && pdfOnlyMobile) {
+    return (
+      <div className="document-chat-container" ref={containerRef}>
+        <div className="pdf-section" style={{ width: '100%', height: '80vh', flex: '1 1 100%' }}>
+          <Worker workerUrl={pdfjsWorker}>
+            <Viewer
+              fileUrl={pdfUrl}
+              defaultScale={0.9}
+              initialPage={pageNumber - 1}
+              page={pageNumber - 1}
+              onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
+              onLoadError={(error) => console.error(`PDF load error for ${selectedDoc}:`, error)}
+            />
+          </Worker>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="document-chat-container"
       ref={containerRef}
-      style={{ position: 'relative' }}
     >
       <div
         className="pdf-section"
-        style={isMobile
-          ? { flex: `0 0 ${splitRatio}%`, height: `${splitRatio}%` }
-          : { flex: `0 0 ${splitRatio}%` }
-        }
+        style={{
+          flex: `0 0 ${splitRatio}%`,
+          height: isMobile ? `${splitRatio}%` : 'auto'
+        }}
       >
         <Worker workerUrl={pdfjsWorker}>
           <Viewer
             fileUrl={pdfUrl}
-            defaultScale={1.2}
+            defaultScale={isMobile ? 0.8 : 1.2}
             initialPage={pageNumber - 1}
             page={pageNumber - 1}
             onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
@@ -107,11 +126,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1 }) 
         onMouseDown={handleMouseDown}
         style={{
           width: isMobile ? '100%' : '4px',
-          height: isMobile ? '4px' : '100%',
-          backgroundColor: 'var(--border)',
-          cursor: isMobile ? 'row-resize' : 'col-resize',
-          position: 'relative',
-          zIndex: 10
+          height: isMobile ? '4px' : '100%'
         }}
       >
         <div
@@ -131,10 +146,10 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1 }) 
 
       <div
         className="chat-section"
-        style={isMobile
-          ? { flex: `0 0 ${100 - splitRatio}%`, height: `${100 - splitRatio}%`, backgroundColor: '#f8f9fa' }
-          : { flex: `0 0 ${100 - splitRatio}%`, backgroundColor: '#f8f9fa' }
-        }
+        style={{
+          flex: `0 0 ${100 - splitRatio}%`,
+          height: isMobile ? `${100 - splitRatio}%` : 'auto'
+        }}
       >
         <div className="chat-content">
           {children}

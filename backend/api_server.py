@@ -56,7 +56,7 @@ class QueryRequest(BaseModel):
         return v.strip()
 # Dummy journal data
 journals = [
-    {"id": "file-HKVYN4qp29bB6nCKh9fab5", "title": "Amlodipine", "desc": "Medical guidelines", "img":"./images/j21.jpg",
+    {"id": "file-HKVYN4qp29bB6nCKh9fab5", "title": "Amlodipine", "desc": "Medical guidelines", "img":"/images/j21.jpg",
      "defaultDocumentQuestions": [
          {"id": "1", "Question": "What is the main indication or clinical use of the product?"},
          {"id": "2", "Question": "Are there any recent clinical studies supporting the product's efficacy?"},
@@ -64,7 +64,7 @@ journals = [
          {"id": "4", "Question": "What is the recommended dosage, route, and duration for this medication?"},
          {"id": "5", "Question": "What are the most common side effects and safety warnings I should know about?"}
      ]},
-    {"id": "file-N3jMSqG19Sc6pUB8a2C1sV", "title": "Ecosprin 75 Tablet", "desc": "Therapy titles for your e-reader", "img": "./images/j22.jpg",
+    {"id": "file-N3jMSqG19Sc6pUB8a2C1sV", "title": "Ecosprin 75 Tablet", "desc": "Therapy titles for your e-reader", "img": "/images/j22.jpg",
     "defaultDocumentQuestions": [
          {"id": "1", "Question": "What is the main indication or clinical use of the product?"},
          {"id": "2", "Question": "Are there any recent clinical studies supporting the product's efficacy?"},
@@ -73,7 +73,7 @@ journals = [
          {"id": "5", "Question": "What are the most common side effects and safety warnings I should know about?"}
      ]
     },    
-    {"id": "file-KntFu9RZ8s4XUcmsGNE64W", "title": "Antimicrobial_Use_ Guidelines 2024", "desc": "Recent advances in medicine", "img": "./images/j23.png",
+    {"id": "file-KntFu9RZ8s4XUcmsGNE64W", "title": "Antimicrobial_Use_ Guidelines 2024", "desc": "Recent advances in medicine", "img": "/images/j23.png",
       "defaultDocumentQuestions": [
          {"id": "1", "Question": "What are the first-line antibiotics recommended for common bacterial infections in India?"},
          {"id": "2", "Question": "What are the diagnostic criteria and recommended management for acute rheumatic fever?"},

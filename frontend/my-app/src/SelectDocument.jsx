@@ -41,41 +41,28 @@ export default function SelectDocument({ onSelect, isDarkMode }) {
   return (
     <div className="landing-page">
       {/* Advertisement Banner */}
-            <div style={{ textAlign: 'center', margin: '0 0 0.5rem 0', position: 'relative', backgroundColor: isDarkMode ? '#333' : '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
-        <div style={{
-          display: 'inline-block',
-          border: '1px solid #ddd',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          maxWidth: '728px',
-          width: '100%'
-        }}>
+      <div className={`ad-banner ${isDarkMode ? 'dark' : ''}`}>
+        <div className="ad-container">
           <img 
             src={ads[currentAd]} 
             alt="Advertisement" 
-            style={{ 
-              width: '100%', 
-              height: 'auto', 
-              display: 'block',
-              transition: 'opacity 0.5s ease-in-out'
-            }} 
+            className="ad-image"
           />
         </div>
       </div>
       
       {/* Centered Logo and Subtitle */}
-      <div style={{ textAlign: 'center', marginBottom: '1rem', position: 'relative' }}>
-        <img src={isDarkMode ? logoDark : logoLight} alt="App Logo" style={{ maxWidth: '500px', height: 'auto', marginBottom: '0.5rem' }} />
-        {/* <h1 style={{ fontWeight: 'bold', fontSize: '0.8rem', margin: '0', color: 'lightgray', position: 'absolute', left: '50%', transform: 'translateX(-50%)', textAlign: 'left', width: '400px' }}>MEDICAL INTERACTIONS MADE SIMPLE</h1> */}
+      <div className="logo-section">
+        <img src={isDarkMode ? logoDark : logoLight} alt="App Logo" className="app-logo" />
+        {/* <h1 className="tagline">MEDICAL INTERACTIONS MADE SIMPLE</h1> */}
       </div>
       
       
-      <p style={{ textAlign: 'center', fontSize: '1.2rem' }}>Ask questions to any document</p>
+      <p className="description-text">Ask questions to any document</p>
       {loading ? (
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>Loading journals...</div>
+        <div className="loading-text">Loading journals...</div>
       ) : error ? (
-        <div style={{ textAlign: 'center', color: 'red', marginTop: '2rem' }}>{error}</div>
+        <div className="error-text">{error}</div>
       ) : (
         <div className="document-cards">
           {journals.map(doc => (
@@ -83,7 +70,7 @@ export default function SelectDocument({ onSelect, isDarkMode }) {
               <img src={doc.img} alt={doc.title} />
               <h2>{doc.title}</h2>
               <p>{doc.desc}</p>
-              <button onClick={() => onSelect(doc.id)} style={ !isDarkMode ? { backgroundColor: '#2d3279', color: 'white' } : {} }>SELECT</button>
+              <button onClick={() => onSelect(doc.id)} className={!isDarkMode ? 'light-theme-button' : ''}>SELECT</button>
             </div>
           ))}
         </div>

@@ -59,7 +59,7 @@ const TypingAnimation = ({ text, speed = 8 }) => {
 };
 
 // Main Chat Component
-const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebarExpanded, toggleSidebar, toggleTheme }) => {
+const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebarExpanded, toggleSidebar, isMobile }) => {
   const [question, setQuestion] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +70,7 @@ const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebar
 
   const handleReferenceClick = (fileId) => {
     // Open the PDF in a new tab using the backend API
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
     window.open(`${apiBaseUrl}/pdf/${fileId}`, '_blank');
   };
 
@@ -111,7 +111,7 @@ const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebar
     setResults(prev => [...prev, tempResult]);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
       const response = await fetch(`${apiBaseUrl}/ask`, {
         method: 'POST',
         headers: {
@@ -207,7 +207,7 @@ const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebar
     setResults(prev => [...prev, tempResult]);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
       const response = await fetch(`${apiBaseUrl}/ask`, {
         method: 'POST',
         headers: {
@@ -294,7 +294,7 @@ const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebar
 
   return (
     <>
-      {!sidebarExpanded && (
+      {!sidebarExpanded && window.innerWidth > 767 && (
         <button className="sidebar-toggle" onClick={toggleSidebar}>
           ☰
         </button>
@@ -432,29 +432,102 @@ import DocumentChat from './DocumentChat';
 import Reports from './Reports';
 
 // ChatPage component
-const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, toggleSidebar, toggleTheme }) => {
+const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, toggleSidebar, isMobile }) => {
   const { docId } = useParams();
+  // Mobile section state: 'chat', 'pdf', 'documents'
+  const [mobileSection, setMobileSection] = useState('chat');
+  // Detect mobile view
+  // const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
+  // useEffect(() => {
+  //   const handleResize = () => setIsMobile(window.innerWidth <= 767);
+  //   window.addEventListener('resize', handleResize);
+  //   return () => window.removeEventListener('resize', handleResize);
+  // }, []);
+
+  // Mobile nav bar
+  const mobileNavBar = isMobile ? (
+    <div className="mobile-nav-bar">
+      <button className={mobileSection === 'pdf' ? 'active' : ''} onClick={() => setMobileSection('pdf')}>PDF File</button>
+      <button className={mobileSection === 'chat' ? 'active' : ''} onClick={() => setMobileSection('chat')}>Chat</button>
+      <button className={mobileSection === 'documents' ? 'active' : ''} onClick={() => setMobileSection('documents')}>Documents</button>
+    </div>
+  ) : null;
+
+  // Render section based on mobileSection
+  let sectionContent;
+  if (!isMobile) {
+    sectionContent = (
+      <DocumentChat selectedDoc={docId} pageNumber={1}>
+        <ChatApp 
+          selectedDoc={docId} 
+          onPageClick={onPageClick} 
+          journals={journals}
+          onDocumentSelect={onDocumentSelect}
+          sidebarExpanded={sidebarExpanded}
+          toggleSidebar={toggleSidebar}
+          isMobile={isMobile}
+        />
+      </DocumentChat>
+    );
+  } else {
+    if (mobileSection === 'pdf') {
+      sectionContent = (
+        <div className="mobile-section-content">
+          <DocumentChat selectedDoc={docId} pageNumber={1} pdfOnlyMobile={true} />
+        </div>
+      );
+    } else if (mobileSection === 'chat') {
+      sectionContent = (
+        <div className="mobile-section-content">
+          <ChatApp 
+            selectedDoc={docId} 
+            onPageClick={onPageClick} 
+            journals={journals}
+            onDocumentSelect={onDocumentSelect}
+            sidebarExpanded={sidebarExpanded}
+            toggleSidebar={toggleSidebar}
+          />
+        </div>
+      );
+    } else if (mobileSection === 'documents') {
+      sectionContent = (
+        <div className="mobile-section-content">
+          <div className="sidebar-journals">
+            <h3>Available Documents</h3>
+            <div className="journals-list">
+              {journals.map(doc => (
+                <div
+                  key={doc.id}
+                  className="journal-item"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => onDocumentSelect(doc.id)}
+                >
+                  <span className="journal-title">{doc.title}</span>
+                  <span className="journal-desc">{doc.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
-    <DocumentChat selectedDoc={docId} pageNumber={1}>
-      <ChatApp 
-        selectedDoc={docId} 
-        onPageClick={onPageClick} 
-        journals={journals}
-        onDocumentSelect={onDocumentSelect}
-        sidebarExpanded={sidebarExpanded}
-        toggleSidebar={toggleSidebar}
-        toggleTheme={toggleTheme}
-      />
-    </DocumentChat>
+    <>
+      {mobileNavBar}
+      {sectionContent}
+    </>
   );
 };
 
 export default function App() {
   const [pdfPage, setPdfPage] = useState(1);
   const [journals, setJournals] = useState([]);
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(window.innerWidth > 767);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showJournalsList, setShowJournalsList] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -463,13 +536,14 @@ export default function App() {
     setSidebarExpanded(!sidebarExpanded);
   };
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.setAttribute('data-theme', isDarkMode ? 'light' : 'dark');
-  };
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 767);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://88.222.241.107:8000';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
     fetch(`${apiBaseUrl}/journals`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch journals');
@@ -513,13 +587,42 @@ export default function App() {
 
   const handleDocumentSelect = (docId) => {
     console.log(`Opening document: ${docId}`);
+    setSidebarExpanded(false);
     navigate(`/chat/${docId}`);
   };
 
+  // Get current document name for breadcrumb
+  let currentDocName = '';
+  if (location.pathname.startsWith('/chat/')) {
+    const docId = location.pathname.split('/chat/')[1];
+    const doc = journals.find(j => j.id === docId);
+    currentDocName = doc ? doc.title : '';
+  }
+
   return (
     <div className={`app-layout ${sidebarExpanded && location.pathname !== '/' ? 'sidebar-expanded' : ''}`}>
+      {/* Mobile-friendly header with breadcrumb and document selector */}
+      {/* Mobile header: show only on mobile view */}
+      <div className="mobile-header">
+        <div className="breadcrumb">
+          <span className="breadcrumb-home" onClick={() => navigate('/')}>Home</span>
+          {currentDocName && <span className="breadcrumb-sep">/</span>}
+          {currentDocName && (
+            <span className="breadcrumb-doc" title={currentDocName}>
+              {currentDocName.length > 20 ? currentDocName.substring(0, 17) + '...' : currentDocName}
+            </span>
+          )}
+        </div>
+        {isMobile && location.pathname !== '/' && (
+          <button className="mobile-menu-icon" onClick={toggleSidebar}>
+            ☰
+          </button>
+        )}
+      </div>
+
+      {/* Sidebar remains for desktop/tablet */}
       {location.pathname !== '/' && (
-        <div className={`sidebar ${sidebarExpanded ? 'expanded' : ''}`}>
+        <div className={`sidebar ${sidebarExpanded ? 'expanded' : ''} ${isMobile ? 'mobile' : ''}`}>
           <div className="sidebar-header">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
               <img src={isDarkMode ? logoDark : AppLogoSidebarLightTheme} alt="App Logo" style={{ width: '100%', height: '30px' }} />
@@ -529,12 +632,9 @@ export default function App() {
             </button>
           </div>
           <nav className="sidebar-nav">
-            <a href="#" className="nav-item" onClick={() => { navigate('/'); setShowJournalsList(false); }}>Home</a>
-            <a href="#" className="nav-item" onClick={() => navigate('/reports')}>Reports</a>
-            <button className="sidebar-theme-toggle" onClick={toggleTheme}>
-              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            </button>
-            <a href="#" className={`nav-item ${showJournalsList ? 'active' : ''}`} onClick={() => setShowJournalsList(true)}>Documents</a>
+            <a href="#" className="nav-item" onClick={() => { navigate('/'); setShowJournalsList(false); setSidebarExpanded(false); }}>Home</a>
+            <a href="#" className={`nav-item ${showJournalsList ? 'active' : ''}`} onClick={() => setShowJournalsList(!showJournalsList)}>Documents</a>
+            <a href="#" className="nav-item" onClick={() => { navigate('/reports'); setSidebarExpanded(false); }}>Reports</a>
           </nav>
           {showJournalsList && (
             <div className="sidebar-journals">
@@ -560,9 +660,10 @@ export default function App() {
         </div>
       )}
 
+      {/* Main content routes */}
       <Routes>
         <Route path="/" element={<SelectDocument onSelect={handleDocumentSelect} isDarkMode={isDarkMode} />} />
-        <Route path="/chat/:docId" element={<ChatPage journals={journals} onPageClick={handlePageClick} onDocumentSelect={handleDocumentSelect} sidebarExpanded={sidebarExpanded} toggleSidebar={toggleSidebar} toggleTheme={toggleTheme} />} />
+        <Route path="/chat/:docId" element={<ChatPage journals={journals} onPageClick={handlePageClick} onDocumentSelect={handleDocumentSelect} sidebarExpanded={sidebarExpanded} toggleSidebar={toggleSidebar} isMobile={isMobile} />} />
         <Route path="/reports" element={<Reports sidebarExpanded={sidebarExpanded} toggleSidebar={toggleSidebar} isDarkMode={isDarkMode} />} />
       </Routes>
     </div>

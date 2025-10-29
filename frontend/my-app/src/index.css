@@ -615,7 +615,7 @@ body {
   max-width: none;
   min-width: auto;
   margin: 0;
-  background-color: var(--bg-secondary);
+  background: linear-gradient(to bottom, #f6f9ff 0%, #dce9f9 100%);
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 4px 20px var(--shadow);
@@ -1334,7 +1334,7 @@ body {
 }
 
 .chat-section {
-  background: var(--bg-primary);
+  background: linear-gradient(to bottom, #f6f9ff 0%, #dce9f9 100%);
   color: var(--text-primary);
   padding: 2rem 0 2rem 2rem; /* Removed right padding completely */
   display: flex;
@@ -1506,4 +1506,813 @@ body {
 
 .document-card button:hover {
   background: var(--accent-hover);
+}
+
+/* Light theme button override */
+.light-theme-button {
+  background-color: #2d3279 !important;
+  color: white !important;
+}
+
+.light-theme-button:hover {
+  background-color: #243072 !important;
+}
+
+/* ========================================
+   REPORTS COMPONENT STYLES
+   ======================================== */
+
+.reports-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.reports-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.reports-grid.sidebar-expanded {
+  grid-template-columns: 1fr;
+}
+
+.reports-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  box-shadow: 0 2px 8px var(--shadow);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.reports-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.reports-chart-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.reports-list-container {
+  height: 350px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
+.reports-list-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.reports-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.reports-list-item {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+  padding: 0.25rem 0;
+}
+
+.reports-footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 2rem;
+}
+
+/* Mobile-specific styles for Reports */
+@media (max-width: 767px) {
+  .reports-container {
+    padding: 1rem;
+  }
+
+  .reports-header {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+  }
+
+  .reports-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .reports-card {
+    padding: 1rem;
+    min-height: 350px;
+  }
+
+  .reports-chart-container {
+    min-height: 250px;
+  }
+
+  .reports-list-container {
+    height: 280px;
+    font-size: 0.85rem;
+  }
+
+  .reports-list-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .reports-list-item {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .reports-footer {
+    font-size: 0.85rem;
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reports-container {
+    padding: 0.75rem;
+  }
+
+  .reports-header {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .reports-grid {
+    gap: 1rem;
+  }
+
+  .reports-card {
+    padding: 0.75rem;
+    min-height: 300px;
+  }
+
+  .reports-chart-container {
+    min-height: 200px;
+  }
+
+  .reports-list-container {
+    height: 220px;
+    font-size: 0.8rem;
+  }
+
+  .reports-list-item {
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+  }
+}
+
+/* ========================================
+   DOCUMENT CHAT COMPONENT STYLES
+   ======================================== */
+
+.document-chat-container {
+  display: flex;
+  height: 100vh;
+  position: relative;
+}
+
+.app-layout:not(.sidebar-expanded) .document-chat-container {
+  width: 100vw;
+}
+
+.app-layout.sidebar-expanded .document-chat-container {
+  flex: 1;
+  width: auto;
+}
+
+.pdf-section {
+  flex: 1;
+  border-right: 2px solid var(--border);
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pdf-section .rpv-core__viewer {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+.pdf-section .rpv-core__inner-pages {
+  flex: 1 !important;
+  overflow: auto !important;
+}
+
+.chat-section {
+  background: linear-gradient(to bottom, #f6f9ff 0%, #dce9f9 100%);
+  color: var(--text-primary);
+  padding: 2rem 0 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.chat-content {
+  flex: 1;
+  overflow-y: auto;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.resizer {
+  background-color: var(--border);
+  cursor: col-resize;
+  position: relative;
+  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+.resizer:hover {
+  background-color: var(--accent);
+}
+
+.resizer::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 40px;
+  background-color: var(--accent);
+  border-radius: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.resizer:hover::before {
+  opacity: 1;
+}
+
+/* Mobile-specific styles for Document Chat */
+@media (max-width: 767px) {
+  .document-chat-container {
+    flex-direction: column;
+  }
+
+  .pdf-section {
+    flex: none;
+    height: 50vh;
+    border-right: none;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .chat-section {
+    flex: none;
+    height: 50vh;
+    padding: 1rem 0 1rem 1rem;
+  }
+
+  .resizer {
+    width: 100%;
+    height: 4px;
+    cursor: row-resize;
+    background-color: var(--border);
+  }
+
+  .resizer::before {
+    left: 50%;
+    top: -4px;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-section {
+    padding: 0.75rem 0 0.75rem 0.75rem;
+  }
+
+  .pdf-section {
+    height: 45vh;
+  }
+
+  .chat-section {
+    height: 55vh;
+  }
+}
+
+/* ========================================
+   ENHANCED MOBILE RESPONSIVENESS
+   ======================================== */
+
+/* Touch Target Standards */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Typography Scale */
+@media (max-width: 480px) {
+  body {
+    font-size: 16px; /* Prevent zoom on iOS */
+    line-height: 1.5;
+  }
+
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.125rem; }
+  h5 { font-size: 1rem; }
+  h6 { font-size: 0.875rem; }
+
+  p { font-size: 1rem; }
+  small { font-size: 0.875rem; }
+}
+
+/* Extra Small Phones (320px - 480px) */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 12px;
+  }
+
+  .landing-page {
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  /* Document cards - single column on very small screens */
+  .document-cards {
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .document-card {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 0.75rem;
+  }
+
+  .document-card img {
+    height: 120px;
+  }
+
+  .document-card h2 {
+    font-size: 1rem;
+    margin: 0.75rem 0 0.25rem;
+  }
+
+  .document-card p {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .document-card button {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* Sidebar adjustments for small phones */
+  .sidebar {
+    width: 260px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .nav-item {
+    font-size: 14px;
+    padding: 12px 0;
+  }
+
+  /* Search adjustments */
+  .search-container {
+    margin: 0 10px 15px;
+    padding: 12px;
+  }
+
+  .search-input {
+    padding: 14px 60px 14px 16px;
+    font-size: 16px;
+  }
+
+  .search-button {
+    width: 44px;
+    height: 44px;
+    right: 6px;
+  }
+
+  /* Results adjustments */
+  .results-container {
+    padding: 12px;
+    margin: 0 8px;
+    margin-bottom: 80px;
+  }
+
+  .result-item {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .question {
+    font-size: 1rem;
+  }
+
+  .answer {
+    font-size: 15px;
+  }
+
+  /* References */
+  .references-box {
+    padding: 10px;
+    margin: 12px 0;
+  }
+
+  .reference-item {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  /* Mobile sticky search */
+  .sticky-search-container {
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .sticky-search-container .search-input {
+    padding: 12px 55px 12px 14px;
+  }
+
+  .sticky-search-container .search-button {
+    width: 40px;
+    height: 40px;
+    right: 6px;
+  }
+}
+
+/* Small Phones (481px - 640px) */
+@media (min-width: 481px) and (max-width: 640px) {
+  .document-cards {
+    gap: 1.5rem;
+  }
+
+  .document-card {
+    width: min(280px, calc(50vw - 1rem));
+  }
+
+  .sidebar {
+    width: 280px;
+  }
+}
+
+/* Large Phones (641px - 767px) */
+@media (min-width: 641px) and (max-width: 767px) {
+  .document-cards {
+    gap: 2rem;
+  }
+
+  .document-card {
+    width: min(300px, calc(33vw - 1.5rem));
+  }
+
+  .sidebar {
+    width: 300px;
+  }
+}
+
+/* Enhanced Touch Interactions */
+@media (hover: none) and (pointer: coarse) {
+  /* All interactive elements should be at least 44px */
+  button,
+  .nav-item,
+  .reference-item,
+  .question-card,
+  .document-card button,
+  .sidebar-toggle,
+  .search-button {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Remove hover effects on touch devices */
+  .nav-item:hover,
+  .reference-item:hover,
+  .question-card:hover,
+  .document-card button:hover,
+  .sidebar-toggle:hover,
+  .search-button:hover {
+    transform: none !important;
+    background-color: inherit !important;
+  }
+
+  /* Add active states for touch feedback */
+  .nav-item:active,
+  .reference-item:active,
+  .question-card:active,
+  .document-card button:active,
+  .sidebar-toggle:active,
+  .search-button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Landscape Orientation Optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landing-page {
+    padding: 0 1rem 0.5rem 1rem;
+  }
+
+  .document-cards {
+    margin-top: 1rem;
+  }
+
+  .document-card {
+    padding: 0.5rem;
+  }
+
+  .document-card img {
+    height: 100px;
+  }
+
+  .welcome-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+
+  .welcome-container p {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  /* Adjust sidebar for landscape */
+  .sidebar {
+    padding-top: 10px;
+  }
+
+  .sidebar-header {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .sidebar-nav {
+    padding: 0 15px;
+  }
+
+  /* Adjust chat layout for landscape */
+  .pdf-section,
+  .chat-section {
+    flex: 1;
+    height: auto;
+  }
+
+  .resizer {
+    width: 4px;
+    height: 100%;
+    cursor: col-resize;
+  }
+
+  .resizer::before {
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 40px;
+  }
+}
+
+/* Safe Area Support for Modern Mobile Devices */
+@supports (padding: max(0px)) {
+  .app-layout {
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+
+  .sidebar {
+    padding-top: max(20px, env(safe-area-inset-top) + 20px);
+  }
+
+  .sticky-search-container {
+    bottom: max(8px, env(safe-area-inset-bottom) + 8px);
+    
+    right: max(8px, env(safe-area-inset-right) + 8px);
+  }
+}
+
+/* Performance Optimizations for Mobile */
+@media (max-width: 767px) {
+  * {
+    /* Reduce animations on low-end devices */
+    animation-duration: 0.2s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.2s !important;
+  }
+
+  /* Optimize scrolling */
+  .sidebar,
+  .chat-content,
+  .results-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Accessibility Enhancements for Mobile */
+@media (max-width: 767px) {
+  /* Ensure sufficient color contrast */
+  .nav-item,
+  .reference-item {
+    border: 1px solid transparent;
+  }
+
+  .nav-item:focus,
+  .reference-item:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Improve focus visibility */
+  button:focus,
+  input:focus,
+  textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ========================================
+   SELECT DOCUMENT COMPONENT STYLES
+   ======================================== */
+
+.ad-banner {
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  position: relative;
+  background-color: var(--bg-tertiary);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.ad-banner.dark {
+  background-color: #333;
+}
+
+.ad-container {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 728px;
+  width: 100%;
+  background: var(--bg-secondary);
+}
+
+.ad-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: opacity 0.5s ease-in-out;
+  border-radius: 8px;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.app-logo {
+  max-width: 500px;
+  height: auto;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.tagline {
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin: 0;
+  color: var(--text-muted);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: left;
+  width: 400px;
+  display: none; /* Hidden by default */
+}
+
+.description-text {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.loading-text {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.error-text {
+  text-align: center;
+  color: #dc3545;
+  margin-top: 2rem;
+  font-size: 1rem;
+  padding: 1rem;
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+/* Mobile-specific adjustments for SelectDocument */
+@media (max-width: 480px) {
+  .ad-banner {
+    margin: 0 0 0.25rem 0;
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .ad-container {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  .ad-image {
+    border-radius: 4px;
+  }
+
+  .logo-section {
+    margin-bottom: 0.75rem;
+  }
+
+  .app-logo {
+    max-width: 300px;
+    margin-bottom: 0.25rem;
+  }
+
+  .description-text {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+  }
+
+  .loading-text,
+  .error-text {
+    margin-top: 1.5rem;
+    font-size: 1rem;
+  }
+
+  .error-text {
+    margin: 1rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .app-logo {
+    max-width: 400px;
+  }
+
+  .description-text {
+    font-size: 1.15rem;
+  }
 }
