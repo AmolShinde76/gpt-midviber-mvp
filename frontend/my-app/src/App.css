@@ -148,12 +148,19 @@
 		display: flex;
 		min-height: 80vh;
 	}
-	.pdf-section, .chat-section {
+	.pdf-section {
 		width: 100% !important;
 		min-width: 0;
 		max-width: 100vw;
 		min-height: 200px;
 		box-sizing: border-box;
+	}
+	.pdf-section .rpv-core__viewer {
+		max-width: 100%;
+		overflow-x: auto;
+	}
+	.pdf-section .rpv-core__page-layer {
+		max-width: 100%;
 	}
 	.sidebar {
 		display: none;

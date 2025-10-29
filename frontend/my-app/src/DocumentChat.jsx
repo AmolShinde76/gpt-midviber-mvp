@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { Worker, Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.js?url';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 
@@ -93,7 +93,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
           <Worker workerUrl={pdfjsWorker}>
             <Viewer
               fileUrl={pdfUrl}
-              defaultScale={0.9}
+              defaultScale={SpecialZoomLevel.PageWidth}
               initialPage={pageNumber - 1}
               page={pageNumber - 1}
               onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
@@ -120,7 +120,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
         <Worker workerUrl={pdfjsWorker}>
           <Viewer
             fileUrl={pdfUrl}
-            defaultScale={isMobile ? 0.9 : 1.2}
+            defaultScale={isMobile ? SpecialZoomLevel.PageWidth : 1.2}
             initialPage={pageNumber - 1}
             page={pageNumber - 1}
             onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
