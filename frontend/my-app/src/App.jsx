@@ -59,231 +59,30 @@ const TypingAnimation = ({ text, speed = 8 }) => {
 };
 
 // Main Chat Component
-const ChatApp = ({ selectedDoc, onPageClick, journals, onDocumentSelect, sidebarExpanded, toggleSidebar, isMobile }) => {
-  const [question, setQuestion] = useState('');
-  const [results, setResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [hasAskedFirstQuestion, setHasAskedFirstQuestion] = useState(false);
-
-  const resultsEndRef = useRef(null);
-
-  const handleReferenceClick = (fileId) => {
-    // Open the PDF in a new tab using the backend API
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    window.open(`${apiBaseUrl}/pdf/${fileId}`, '_blank');
-  };
-
-  // Auto-scroll to bottom when new results are added
-  useEffect(() => {
-    if (resultsEndRef.current) {
-      resultsEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [results]);
-
-  // Clear chat when document changes
-  useEffect(() => {
-    console.log(`Document changed to: ${selectedDoc} - clearing chat history`);
-    setResults([]);
-    setHasAskedFirstQuestion(false);
-  }, [selectedDoc]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!question.trim()) return;
-
-    const questionText = question.trim();
-    setQuestion('');
-    setHasAskedFirstQuestion(true);
-    setIsLoading(true);
-    setError('');
-
-    // Immediately add the question to results with a temporary answer
-    const tempResult = {
-      id: Date.now(),
-      question: questionText,
-      answer: '', // Will be filled when response comes
-      references: [],
-      total_tokens: 'N/A',
-      isLoading: true
-    };
-
-    setResults(prev => [...prev, tempResult]);
-
-    try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiBaseUrl}/ask`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question: questionText, document_id: selectedDoc }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedAnswer = '';
-      let references = [];
-      let total_tokens = 'N/A';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line);
-              if (data.type === 'chunk') {
-                accumulatedAnswer += data.content;
-                // Update the result with the current accumulated answer
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        isLoading: true // Keep loading until end
-                      }
-                    : result
-                ));
-              } else if (data.type === 'end') {
-                references = data.references || [];
-                total_tokens = data.total_tokens || 'N/A';
-                // Update with final data
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        references: references,
-                        total_tokens: total_tokens,
-                        isLoading: false
-                      }
-                    : result
-                ));
-              }
-            } catch (e) {
-              console.error('Error parsing JSON:', e);
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error('API Error:', err);
-      setError(`Failed to get response: ${err.message}`);
-      // Update the result to show error
-      setResults(prev => prev.map(result =>
-        result.id === tempResult.id
-          ? { ...result, answer: `Error: ${err.message}`, isLoading: false }
-          : result
-      ));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCardClick = async (cardQuestion) => {
-    setHasAskedFirstQuestion(true);
-    setIsLoading(true);
-    setError('');
-
-    // Immediately add the question to results with a temporary answer
-    const tempResult = {
-      id: Date.now(),
-      question: cardQuestion,
-      answer: '', // Will be filled when response comes
-      references: [],
-      total_tokens: 'N/A',
-      isLoading: true
-    };
-
-    setResults(prev => [...prev, tempResult]);
-
-    try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiBaseUrl}/ask`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question: cardQuestion, document_id: selectedDoc }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedAnswer = '';
-      let references = [];
-      let total_tokens = 'N/A';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line);
-              if (data.type === 'chunk') {
-                accumulatedAnswer += data.content;
-                // Update the result with the current accumulated answer
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        isLoading: true // Keep loading until end
-                      }
-                    : result
-                ));
-              } else if (data.type === 'end') {
-                references = data.references || [];
-                total_tokens = data.total_tokens || 'N/A';
-                // Update with final data
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        references: references,
-                        total_tokens: total_tokens,
-                        isLoading: false
-                      }
-                    : result
-                ));
-              }
-            } catch (e) {
-              console.error('Error parsing JSON:', e);
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error('API Error:', err);
-      setError(`Failed to get response: ${err.message}`);
-      // Update the result to show error
-      setResults(prev => prev.map(result =>
-        result.id === tempResult.id
-          ? { ...result, answer: `Error: ${err.message}`, isLoading: false }
-          : result
-      ));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const ChatApp = ({ 
+  selectedDoc, 
+  onPageClick, 
+  journals, 
+  onDocumentSelect, 
+  sidebarExpanded, 
+  toggleSidebar, 
+  isMobile,
+  // Chat state props
+  question,
+  setQuestion,
+  results,
+  setResults,
+  isLoading,
+  setIsLoading,
+  error,
+  setError,
+  hasAskedFirstQuestion,
+  setHasAskedFirstQuestion,
+  resultsEndRef,
+  handleSubmit,
+  handleCardClick,
+  handleReferenceClick
+}) => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -434,22 +233,254 @@ import Reports from './Reports';
 // ChatPage component
 const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, toggleSidebar, isMobile }) => {
   const { docId } = useParams();
-  // Mobile section state: 'chat', 'pdf', 'documents'
+  // Mobile section state: 'chat', 'pdf'
   const [mobileSection, setMobileSection] = useState('chat');
-  // Detect mobile view
-  // const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
-  // useEffect(() => {
-  //   const handleResize = () => setIsMobile(window.innerWidth <= 767);
-  //   window.addEventListener('resize', handleResize);
-  //   return () => window.removeEventListener('resize', handleResize);
-  // }, []);
+  // Chat state - lifted from ChatApp to persist across mobile section switches
+  const [question, setQuestion] = useState('');
+  const [results, setResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [hasAskedFirstQuestion, setHasAskedFirstQuestion] = useState(false);
+
+  const resultsEndRef = useRef(null);
+
+  // Clear chat when document changes and ensure mobile view shows chat section
+  useEffect(() => {
+    console.log(`Document changed to: ${docId} - clearing chat history`);
+    setResults([]);
+    setHasAskedFirstQuestion(false);
+    setQuestion('');
+    setError('');
+    if (isMobile) {
+      setMobileSection('chat');
+    }
+  }, [docId, isMobile]);
+
+  // Auto-scroll to bottom when new results are added
+  useEffect(() => {
+    if (resultsEndRef.current) {
+      if (isMobile) {
+        // For mobile, scroll to the very bottom of the page
+        setTimeout(() => {
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 100);
+      } else {
+        resultsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [results, isMobile]);
+
+  const handleReferenceClick = (fileId) => {
+    // Open the PDF in a new tab using the backend API
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    window.open(`${apiBaseUrl}/pdf/${fileId}`, '_blank');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!question.trim()) return;
+
+    const questionText = question.trim();
+    setQuestion('');
+    setHasAskedFirstQuestion(true);
+    setIsLoading(true);
+    setError('');
+
+    // Immediately add the question to results with a temporary answer
+    const tempResult = {
+      id: Date.now(),
+      question: questionText,
+      answer: '', // Will be filled when response comes
+      references: [],
+      total_tokens: 'N/A',
+      isLoading: true
+    };
+
+    setResults(prev => [...prev, tempResult]);
+
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiBaseUrl}/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: questionText, document_id: docId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedAnswer = '';
+      let references = [];
+      let total_tokens = 'N/A';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'chunk') {
+                accumulatedAnswer += data.content;
+                // Update the result with the current accumulated answer
+                setResults(prev => prev.map(result =>
+                  result.id === tempResult.id
+                    ? {
+                        ...result,
+                        answer: accumulatedAnswer,
+                        isLoading: true // Keep loading until end
+                      }
+                    : result
+                ));
+              } else if (data.type === 'end') {
+                references = data.references || [];
+                total_tokens = data.total_tokens || 'N/A';
+                // Update with final data
+                setResults(prev => prev.map(result =>
+                  result.id === tempResult.id
+                    ? {
+                        ...result,
+                        answer: accumulatedAnswer,
+                        references: references,
+                        total_tokens: total_tokens,
+                        isLoading: false
+                      }
+                    : result
+                ));
+              }
+            } catch (e) {
+              console.error('Error parsing JSON:', e);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('API Error:', err);
+      setError(`Failed to get response: ${err.message}`);
+      // Update the result to show error
+      setResults(prev => prev.map(result =>
+        result.id === tempResult.id
+          ? { ...result, answer: `Error: ${err.message}`, isLoading: false }
+          : result
+      ));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCardClick = async (cardQuestion) => {
+    setHasAskedFirstQuestion(true);
+    setIsLoading(true);
+    setError('');
+
+    // Immediately add the question to results with a temporary answer
+    const tempResult = {
+      id: Date.now(),
+      question: cardQuestion,
+      answer: '', // Will be filled when response comes
+      references: [],
+      total_tokens: 'N/A',
+      isLoading: true
+    };
+
+    setResults(prev => [...prev, tempResult]);
+
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiBaseUrl}/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: cardQuestion, document_id: docId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedAnswer = '';
+      let references = [];
+      let total_tokens = 'N/A';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'chunk') {
+                accumulatedAnswer += data.content;
+                // Update the result with the current accumulated answer
+                setResults(prev => prev.map(result =>
+                  result.id === tempResult.id
+                    ? {
+                        ...result,
+                        answer: accumulatedAnswer,
+                        isLoading: true // Keep loading until end
+                      }
+                    : result
+                ));
+              } else if (data.type === 'end') {
+                references = data.references || [];
+                total_tokens = data.total_tokens || 'N/A';
+                // Update with final data
+                setResults(prev => prev.map(result =>
+                  result.id === tempResult.id
+                    ? {
+                        ...result,
+                        answer: accumulatedAnswer,
+                        references: references,
+                        total_tokens: total_tokens,
+                        isLoading: false
+                      }
+                    : result
+                ));
+              }
+            } catch (e) {
+              console.error('Error parsing JSON:', e);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('API Error:', err);
+      setError(`Failed to get response: ${err.message}`);
+      // Update the result to show error
+      setResults(prev => prev.map(result =>
+        result.id === tempResult.id
+          ? { ...result, answer: `Error: ${err.message}`, isLoading: false }
+          : result
+      ));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Mobile nav bar
   const mobileNavBar = isMobile ? (
     <div className="mobile-nav-bar">
       <button className={mobileSection === 'pdf' ? 'active' : ''} onClick={() => setMobileSection('pdf')}>PDF File</button>
       <button className={mobileSection === 'chat' ? 'active' : ''} onClick={() => setMobileSection('chat')}>Chat</button>
-      <button className={mobileSection === 'documents' ? 'active' : ''} onClick={() => setMobileSection('documents')}>Documents</button>
     </div>
   ) : null;
 
@@ -466,6 +497,21 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
           sidebarExpanded={sidebarExpanded}
           toggleSidebar={toggleSidebar}
           isMobile={isMobile}
+          // Chat state props
+          question={question}
+          setQuestion={setQuestion}
+          results={results}
+          setResults={setResults}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          error={error}
+          setError={setError}
+          hasAskedFirstQuestion={hasAskedFirstQuestion}
+          setHasAskedFirstQuestion={setHasAskedFirstQuestion}
+          resultsEndRef={resultsEndRef}
+          handleSubmit={handleSubmit}
+          handleCardClick={handleCardClick}
+          handleReferenceClick={handleReferenceClick}
         />
       </DocumentChat>
     );
@@ -476,7 +522,7 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
           <DocumentChat selectedDoc={docId} pageNumber={1} pdfOnlyMobile={true} />
         </div>
       );
-    } else if (mobileSection === 'chat') {
+    } else {
       sectionContent = (
         <div className="mobile-section-content">
           <ChatApp 
@@ -486,28 +532,22 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
             onDocumentSelect={onDocumentSelect}
             sidebarExpanded={sidebarExpanded}
             toggleSidebar={toggleSidebar}
+            // Chat state props
+            question={question}
+            setQuestion={setQuestion}
+            results={results}
+            setResults={setResults}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+            error={error}
+            setError={setError}
+            hasAskedFirstQuestion={hasAskedFirstQuestion}
+            setHasAskedFirstQuestion={setHasAskedFirstQuestion}
+            resultsEndRef={resultsEndRef}
+            handleSubmit={handleSubmit}
+            handleCardClick={handleCardClick}
+            handleReferenceClick={handleReferenceClick}
           />
-        </div>
-      );
-    } else if (mobileSection === 'documents') {
-      sectionContent = (
-        <div className="mobile-section-content">
-          <div className="sidebar-journals">
-            <h3>Available Documents</h3>
-            <div className="journals-list">
-              {journals.map(doc => (
-                <div
-                  key={doc.id}
-                  className="journal-item"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => onDocumentSelect(doc.id)}
-                >
-                  <span className="journal-title">{doc.title}</span>
-                  <span className="journal-desc">{doc.desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       );
     }
