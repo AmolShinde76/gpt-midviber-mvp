@@ -8,6 +8,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
   const containerRef = useRef(null);
+  const chatContentRef = useRef(null);
 
   console.log(`Loading PDF for document: ${selectedDoc}, page: ${pageNumber}`);
 
@@ -77,6 +78,13 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
+  // Scroll to top when new document is selected
+  React.useEffect(() => {
+    if (chatContentRef.current) {
+      chatContentRef.current.scrollTop = 0;
+    }
+  }, [selectedDoc]);
+
   // If mobile and pdfOnlyMobile, show only PDF section
   if (isMobile && pdfOnlyMobile) {
     return (
@@ -112,7 +120,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
         <Worker workerUrl={pdfjsWorker}>
           <Viewer
             fileUrl={pdfUrl}
-            defaultScale={isMobile ? 0.8 : 1.2}
+            defaultScale={isMobile ? 0.9 : 1.2}
             initialPage={pageNumber - 1}
             page={pageNumber - 1}
             onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
@@ -151,7 +159,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
           height: isMobile ? `${100 - splitRatio}%` : 'auto'
         }}
       >
-        <div className="chat-content">
+        <div className="chat-content" ref={chatContentRef}>
           {children}
         </div>
       </div>

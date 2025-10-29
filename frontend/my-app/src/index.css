@@ -330,6 +330,7 @@ body {
   transform: translateY(0);
   transition: all 0.5s ease;
   min-height: 60px; /* Ensure consistent header height */
+  margin-top: 60px; /* Add margin from top to position under nav bars */
 }
 
 .header.fade-out {
@@ -456,6 +457,7 @@ body {
 .welcome-message {
   text-align: center;
   margin-bottom: 30px;
+  margin-top: 100px;
 }
 
 .welcome-message h2 {
@@ -1096,6 +1098,24 @@ body {
     margin-bottom: 20px;
   }
 
+  /* Mobile welcome message adjustments */
+  .welcome-message {
+    margin-top: 0;
+  }
+
+  /* Mobile section content - ensure welcome message is visible */
+  .mobile-section-content {
+    position: relative;
+    z-index: 1;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .mobile-section-content .welcome-container {
+    padding-top: 0;
+    margin-top: 0;
+  }
+
   /* Mobile search form */
   .search-container {
     margin: 0 15px 20px;
@@ -1659,6 +1679,10 @@ body {
   .reports-footer {
     font-size: 0.85rem;
     margin-top: 1.5rem;
+  }
+
+  .reports-container .sidebar-toggle {
+    display: none;
   }
 }
 

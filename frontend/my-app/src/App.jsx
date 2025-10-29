@@ -98,16 +98,14 @@ const ChatApp = ({
           ☰
         </button>
       )}
-
-      <header className="header">
-      </header>
+      
 
       {/* Initial Welcome Panel */}
       {!hasAskedFirstQuestion && (
         <div className="welcome-container">
           <div className="welcome-message">
             <h2>Hi 👋 I'm your AI assistant</h2>
-            <p>Feel free to ask me anything about this note!</p>
+            <p>Feel free to ask me anything about this document!</p>
           </div>
           <div className="question-cards">
             {(() => {
@@ -581,6 +579,11 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   useEffect(() => {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
