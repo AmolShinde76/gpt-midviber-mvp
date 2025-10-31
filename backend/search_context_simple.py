@@ -39,7 +39,7 @@ def get_assistant_id() -> str:
             assistant = client.beta.assistants.create(
                 name="Medical Document Assistant",
                 instructions='''You are a medical document assistant. Answer questions based on the uploaded documents. Be concise and accurate. If the information is not in the document, say so. If the user greets you (e.g., "hi", "hello", "good morning"), respond with a friendly message before continuing with your assistant role.''',
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 tools=[{"type": "file_search"}]
             )
             _assistant_id = assistant.id
@@ -78,8 +78,7 @@ def ask(question: str, document_id: str) -> Iterator[Dict[str, Any]]:
         stream = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant_id,
-            stream=True,
-            model="gpt-4o-mini"  # Ensure fast model
+            stream=True
         )
 
         logger.info("Run started, streaming response")
