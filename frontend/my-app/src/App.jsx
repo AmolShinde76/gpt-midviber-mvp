@@ -8,6 +8,9 @@ import logoDark from './assets/AppLogoDarkTheme.png';
 import AppLogoSidebarLightTheme from './assets/AppLogoSidebarLightTheme.png';
 import { useNavigate, Routes, Route, useParams, useLocation } from 'react-router-dom';
 
+// Import session manager
+import { getOrCreateSessionId } from './utils/sessionManager';
+
 // AnswerText component to make page number clickable
 function AnswerText({ text, onPageClick }) {
   const match = text.match(/Page no: (\d+)/);
@@ -171,7 +174,7 @@ const ChatApp = ({
 
               {/* Show answer */}
               <div className="answer">
-                {result.isLoading ? (
+                {result.isLoading && result.answer.trim() === '' ? (
                   <div className="thinking-animation">
                     <div className="thinking-dots">
                       <span></span>
@@ -239,6 +242,8 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasAskedFirstQuestion, setHasAskedFirstQuestion] = useState(false);
+  // Session management
+  const [sessionId, setSessionId] = useState(null);
 
   const resultsEndRef = useRef(null);
 
@@ -249,6 +254,10 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
     setHasAskedFirstQuestion(false);
     setQuestion('');
     setError('');
+    // Get or create session ID for this document
+    const newSessionId = getOrCreateSessionId(docId);
+    setSessionId(newSessionId);
+    console.log(`Using session ID: ${newSessionId} for document: ${docId}`);
     if (isMobile) {
       setMobileSection('chat');
     }
@@ -299,71 +308,77 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
 
     setResults(prev => [...prev, tempResult]);
 
+    // Declare variables in outer scope so EventSource handlers can access them
+    let accumulatedAnswer = '';
+    let references = [];
+    let total_tokens = 'N/A';
+
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiBaseUrl}/ask`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question: questionText, document_id: docId }),
-      });
+      
+      // Use EventSource for SSE
+      const eventSourceUrl = `${apiBaseUrl}/ask?question=${encodeURIComponent(questionText)}&document_id=${encodeURIComponent(docId)}&session_id=${encodeURIComponent(sessionId)}`;
+      console.log('Connecting to EventSource:', eventSourceUrl);
+      
+      const eventSource = new EventSource(eventSourceUrl);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      eventSource.onopen = () => {
+        console.log('EventSource connection opened');
+      };
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedAnswer = '';
-      let references = [];
-      let total_tokens = 'N/A';
+      eventSource.onmessage = (event) => {
+        console.log('Received SSE event:', event.data);
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Parsed SSE data:', data);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line);
-              if (data.type === 'chunk') {
-                accumulatedAnswer += data.content;
-                // Update the result with the current accumulated answer
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        isLoading: true // Keep loading until end
-                      }
-                    : result
-                ));
-              } else if (data.type === 'end') {
-                references = data.references || [];
-                total_tokens = data.total_tokens || 'N/A';
-                // Update with final data
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        references: references,
-                        total_tokens: total_tokens,
-                        isLoading: false
-                      }
-                    : result
-                ));
-              }
-            } catch (e) {
-              console.error('Error parsing JSON:', e);
-            }
+          if (data.type === 'chunk') {
+            accumulatedAnswer += data.content;
+            console.log('Accumulated answer so far:', accumulatedAnswer);
+            // Update the result with the current accumulated answer
+            setResults(prev => prev.map(result =>
+              result.id === tempResult.id
+                ? {
+                    ...result,
+                    answer: accumulatedAnswer,
+                    isLoading: true // Keep loading until end
+                  }
+                : result
+            ));
+          } else if (data.type === 'end') {
+            references = data.references || [];
+            total_tokens = data.total_tokens || 'N/A';
+            console.log('Stream ended, final answer:', accumulatedAnswer);
+            // Update with final data
+            setResults(prev => prev.map(result =>
+              result.id === tempResult.id
+                ? {
+                    ...result,
+                    answer: accumulatedAnswer,
+                    references: references,
+                    total_tokens: total_tokens,
+                    isLoading: false
+                  }
+                : result
+            ));
+            eventSource.close();
           }
+        } catch (e) {
+          console.error('Error parsing SSE JSON:', e, 'Data:', event.data);
         }
-      }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error('SSE error:', error);
+        setError(`Failed to get response: SSE error`);
+        setResults(prev => prev.map(result =>
+          result.id === tempResult.id
+            ? { ...result, answer: `Error: SSE connection failed`, isLoading: false }
+            : result
+        ));
+        eventSource.close();
+      };
+
     } catch (err) {
       console.error('API Error:', err);
       setError(`Failed to get response: ${err.message}`);
@@ -395,71 +410,77 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
 
     setResults(prev => [...prev, tempResult]);
 
+    // Declare variables in outer scope so EventSource handlers can access them
+    let accumulatedAnswer = '';
+    let references = [];
+    let total_tokens = 'N/A';
+
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiBaseUrl}/ask`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question: cardQuestion, document_id: docId }),
-      });
+      
+      // Use EventSource for SSE
+      const eventSourceUrl = `${apiBaseUrl}/ask?question=${encodeURIComponent(cardQuestion)}&document_id=${encodeURIComponent(docId)}&session_id=${encodeURIComponent(sessionId)}`;
+      console.log('Connecting to EventSource:', eventSourceUrl);
+      
+      const eventSource = new EventSource(eventSourceUrl);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      eventSource.onopen = () => {
+        console.log('EventSource connection opened');
+      };
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedAnswer = '';
-      let references = [];
-      let total_tokens = 'N/A';
+      eventSource.onmessage = (event) => {
+        console.log('Received SSE event:', event.data);
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Parsed SSE data:', data);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.trim()) {
-            try {
-              const data = JSON.parse(line);
-              if (data.type === 'chunk') {
-                accumulatedAnswer += data.content;
-                // Update the result with the current accumulated answer
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        isLoading: true // Keep loading until end
-                      }
-                    : result
-                ));
-              } else if (data.type === 'end') {
-                references = data.references || [];
-                total_tokens = data.total_tokens || 'N/A';
-                // Update with final data
-                setResults(prev => prev.map(result =>
-                  result.id === tempResult.id
-                    ? {
-                        ...result,
-                        answer: accumulatedAnswer,
-                        references: references,
-                        total_tokens: total_tokens,
-                        isLoading: false
-                      }
-                    : result
-                ));
-              }
-            } catch (e) {
-              console.error('Error parsing JSON:', e);
-            }
+          if (data.type === 'chunk') {
+            accumulatedAnswer += data.content;
+            console.log('Accumulated answer so far:', accumulatedAnswer);
+            // Update the result with the current accumulated answer
+            setResults(prev => prev.map(result =>
+              result.id === tempResult.id
+                ? {
+                    ...result,
+                    answer: accumulatedAnswer,
+                    isLoading: true // Keep loading until end
+                  }
+                : result
+            ));
+          } else if (data.type === 'end') {
+            references = data.references || [];
+            total_tokens = data.total_tokens || 'N/A';
+            console.log('Stream ended, final answer:', accumulatedAnswer);
+            // Update with final data
+            setResults(prev => prev.map(result =>
+              result.id === tempResult.id
+                ? {
+                    ...result,
+                    answer: accumulatedAnswer,
+                    references: references,
+                    total_tokens: total_tokens,
+                    isLoading: false
+                  }
+                : result
+            ));
+            eventSource.close();
           }
+        } catch (e) {
+          console.error('Error parsing SSE JSON:', e, 'Data:', event.data);
         }
-      }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error('SSE error:', error);
+        setError(`Failed to get response: SSE error`);
+        setResults(prev => prev.map(result =>
+          result.id === tempResult.id
+            ? { ...result, answer: `Error: SSE connection failed`, isLoading: false }
+            : result
+        ));
+        eventSource.close();
+      };
+
     } catch (err) {
       console.error('API Error:', err);
       setError(`Failed to get response: ${err.message}`);

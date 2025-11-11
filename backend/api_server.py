@@ -3,12 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, field_validator
 from search_context_simple import ask, client
+from memory_manager import memory_manager, generate_session_id
 import io
 import os
 import json
 import logging
 from dotenv import load_dotenv
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 # Load environment variables
 load_dotenv()
@@ -34,6 +35,7 @@ app.add_middleware(
 class QueryRequest(BaseModel):
     question: str
     document_id: str
+    session_id: Optional[str] = None
 
     @field_validator('question')
     @classmethod
@@ -89,26 +91,77 @@ async def get_journals():
     return JSONResponse(content=journals[:5])
 
 @app.post("/ask")
-async def ask_question(request: QueryRequest):
-    """Handle Q&A requests with streaming responses"""
+async def ask_question_post(request: QueryRequest):
+    """Handle Q&A requests with streaming responses and conversation memory"""
+    return await ask_question(request.question, request.document_id, request.session_id)
+
+@app.get("/ask")
+async def ask_question_get(question: str, document_id: str, session_id: str = None):
+    """Handle Q&A requests with streaming responses and conversation memory (GET version for SSE)"""
+    return await ask_question(question, document_id, session_id)
+
+async def ask_question(question: str, document_id: str, session_id: str = None):
+    """Handle Q&A requests with streaming responses and conversation memory"""
     try:
-        logger.info(f"Received question for document: {request.document_id}")
+        logger.info(f"Received question for document: {document_id}, session: {session_id}")
+
+        # Generate session ID if not provided (for backward compatibility)
+        if not session_id:
+            session_id = generate_session_id(document_id)
+            logger.info(f"Generated new session ID: {session_id}")
+
+        logger.info("About to get conversation context")
+        # Get conversation context from memory
+        conversation_context = memory_manager.get_context_for_question(session_id, document_id)
+        if conversation_context:
+            logger.info(f"Using conversation context for session {session_id} (length: {len(conversation_context)})")
+        else:
+            logger.info(f"No conversation context for session {session_id}")
+
+        logger.info("About to create StreamingResponse")
+        # Store the full answer for memory
+        full_answer = []
 
         def generate():
             try:
-                for chunk in ask(request.question, request.document_id):
-                    yield json.dumps(chunk) + "\n"
+                logger.info("Starting generate function")
+                chunk_count = 0
+                for chunk in ask(question, document_id, conversation_context):
+                    chunk_count += 1
+                    logger.info(f"Sending chunk {chunk_count}: {chunk.get('type', 'unknown')}")
+                    if chunk.get("type") == "chunk":
+                        full_answer.append(chunk.get("content", ""))
+                    elif chunk.get("type") == "end":
+                        # Store Q&A pair in memory after successful response
+                        complete_answer = "".join(full_answer)
+                        if complete_answer.strip():
+                            success = memory_manager.add_qa_pair(
+                                session_id=session_id,
+                                question=question,
+                                answer=complete_answer,
+                                document_id=document_id
+                            )
+                            if success:
+                                logger.info(f"Stored Q&A pair in memory for session {session_id}")
+                            else:
+                                logger.warning(f"Failed to store Q&A pair in memory for session {session_id}")
+                        # Add session_id to the end chunk for frontend
+                        chunk["session_id"] = session_id
+                        logger.info(f"Streaming complete, sent {chunk_count} chunks, answer length: {len(complete_answer)}")
+                    # Send as SSE format
+                    yield f"data: {json.dumps(chunk)}\n\n"
             except Exception as e:
                 logger.error(f"Error in streaming response: {e}")
                 error_chunk = {"type": "chunk", "content": f"Error: {str(e)}"}
-                yield json.dumps(error_chunk) + "\n"
-                end_chunk = {"type": "end", "references": [], "total_tokens": "N/A"}
-                yield json.dumps(end_chunk) + "\n"
+                yield f"data: {json.dumps(error_chunk)}\n\n"
+                end_chunk = {"type": "end", "references": [], "total_tokens": "N/A", "session_id": session_id}
+                yield f"data: {json.dumps(end_chunk)}\n\n"
 
+        logger.info("Returning StreamingResponse")
         return StreamingResponse(
             generate(),
-            media_type="application/json",
-            headers={"Cache-Control": "no-cache"}
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
         )
     except Exception as e:
         logger.error(f"Error processing ask request: {e}")
