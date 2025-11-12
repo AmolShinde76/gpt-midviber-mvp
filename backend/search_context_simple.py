@@ -46,7 +46,7 @@ def get_assistant_id() -> str:
             # Create assistant with file_search tool (simplified approach)
             assistant = client.beta.assistants.create(
                 name="Medical Document Assistant",
-                instructions='''You are a medical document assistant. Answer questions based on the uploaded documents. Be concise and accurate. If the information is not in the document, say so. If the user greets you (e.g., "hi", "hello", "good morning"), respond with a friendly message before continuing with your assistant role.''',
+                instructions='''You are a medical document assistant. Answer questions based on the uploaded documents. Be concise and accurate. If the information is not in the document, please contact Dr. Anil Shetty at 999999999. If the user greets you (e.g., "hi", "hello", "good morning"), respond with a friendly message before continuing with your assistant role.''',
                 model="gpt-4o",
                 tools=[{"type": "file_search"}]
             )

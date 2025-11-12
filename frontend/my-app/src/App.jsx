@@ -34,33 +34,6 @@ function AnswerText({ text, onPageClick }) {
   return <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>;
 }
 
-// Typing Animation Component
-const TypingAnimation = ({ text, speed = 8 }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, speed);
-      return () => clearTimeout(timer);
-    }
-  }, [currentIndex, text, speed]);
-
-  useEffect(() => {
-    setDisplayedText('');
-    setCurrentIndex(0);
-  }, [text]);
-
-  return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-      {displayedText}
-    </ReactMarkdown>
-  );
-};
-
 // Main Chat Component
 const ChatApp = ({ 
   selectedDoc, 
@@ -182,8 +155,6 @@ const ChatApp = ({
                       <span></span>
                     </div>
                   </div>
-                ) : result.id === results[results.length - 1]?.id && !isLoading ? (
-                  <TypingAnimation text={result.answer} />
                 ) : (
                   <AnswerText text={result.answer} onPageClick={onPageClick} />
                 )}
