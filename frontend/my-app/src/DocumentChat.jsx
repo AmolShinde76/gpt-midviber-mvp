@@ -5,7 +5,7 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 
 // Memoized PDF Viewer component to prevent unnecessary re-renders
 const PDFViewer = React.memo(({ selectedDoc, pageNumber, isMobile, pdfOnlyMobile }) => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
   const pdfUrl = `${apiBaseUrl}/pdf/${selectedDoc}`;
 
   return (

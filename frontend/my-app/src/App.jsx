@@ -253,7 +253,7 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
 
   const handleReferenceClick = (fileId) => {
     // Open the PDF in a new tab using the backend API
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
     window.open(`${apiBaseUrl}/pdf/${fileId}`, '_blank');
   };
 
@@ -285,7 +285,7 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
     let total_tokens = 'N/A';
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
       
       // Use EventSource for SSE
       const eventSourceUrl = `${apiBaseUrl}/ask?question=${encodeURIComponent(questionText)}&document_id=${encodeURIComponent(docId)}&session_id=${encodeURIComponent(sessionId)}`;
@@ -387,7 +387,7 @@ const ChatPage = ({ journals, onPageClick, onDocumentSelect, sidebarExpanded, to
     let total_tokens = 'N/A';
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
       
       // Use EventSource for SSE
       const eventSourceUrl = `${apiBaseUrl}/ask?question=${encodeURIComponent(cardQuestion)}&document_id=${encodeURIComponent(docId)}&session_id=${encodeURIComponent(sessionId)}`;
@@ -578,7 +578,7 @@ export default function App() {
   }, [location.pathname]);
 
   useEffect(() => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
     fetch(`${apiBaseUrl}/journals`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch journals');

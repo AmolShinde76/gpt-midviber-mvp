@@ -14,7 +14,7 @@ export default function SelectDocument({ onSelect, isDarkMode }) {
   const ads = [ad1, ad2];
 
   useEffect(() => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
     fetch(`${apiBaseUrl}/journals`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch journals');
