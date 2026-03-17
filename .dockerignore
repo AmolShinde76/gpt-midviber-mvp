@@ -1,0 +1,41 @@
+# Dependencies
+frontend/my-app/node_modules
+backend/.venv
+backend/__pycache__
+
+# Environment files (secrets passed at runtime)
+backend/.env
+frontend/my-app/.env
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+frontend/my-app/dist
+
+# Backup and test files
+backend/backup
+backend/Test.py
+backend/index.py
+backend/documents/DEBUG*
+backend/documents/Report.txt
+backend/documents/Questions.txt
+backend/documents/*.txt
+backend/documents/*Copy*
+backend/Images
+
+# Misc
+*.md
+start.bat
+start.sh
