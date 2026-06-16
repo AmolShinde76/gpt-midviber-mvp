@@ -27,9 +27,10 @@ try:
     print("Press Ctrl+C to stop")
     print(f"API Documentation will be available at: http://localhost:{port}/docs")
 
+    host = os.getenv('BACKEND_HOST', '0.0.0.0')
     uvicorn.run(
         "api_server:app",
-        host="127.0.0.1",
+        host=host,
         port=port,
         reload=False,  # Disable reload to avoid multiprocessing issues
         log_level="info"

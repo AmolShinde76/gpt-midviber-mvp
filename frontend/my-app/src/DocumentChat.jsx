@@ -1,18 +1,34 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Worker, Viewer } from '@react-pdf-viewer/core';
+import { Worker, Viewer, SpecialZoomLevel } from '@react-pdf-viewer/core';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.js?url';
 import '@react-pdf-viewer/core/lib/styles/index.css';
+
+// Memoized PDF Viewer component to prevent unnecessary re-renders
+const PDFViewer = React.memo(({ selectedDoc, pageNumber, isMobile, pdfOnlyMobile }) => {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+  const pdfUrl = `${apiBaseUrl}/pdf/${selectedDoc}`;
+
+  return (
+    <Worker workerUrl={pdfjsWorker}>
+      <Viewer
+        key={selectedDoc}
+        fileUrl={pdfUrl}
+        defaultScale={isMobile ? SpecialZoomLevel.PageWidth : 1.2}
+        initialPage={pageNumber - 1}
+        page={pageNumber - 1}
+        onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
+        onLoadError={(error) => console.error(`PDF load error for ${selectedDoc}:`, error)}
+      />
+    </Worker>
+  );
+});
 
 export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pdfOnlyMobile = false }) {
   const [splitRatio, setSplitRatio] = useState(50); // Percentage for PDF section (50% = equal split)
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
   const containerRef = useRef(null);
-
-  console.log(`Loading PDF for document: ${selectedDoc}, page: ${pageNumber}`);
-
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-  const pdfUrl = `${apiBaseUrl}/pdf/${selectedDoc}`;
+  const chatContentRef = useRef(null);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -77,21 +93,19 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
+  // Scroll to top when new document is selected
+  React.useEffect(() => {
+    if (chatContentRef.current) {
+      chatContentRef.current.scrollTop = 0;
+    }
+  }, [selectedDoc]);
+
   // If mobile and pdfOnlyMobile, show only PDF section
   if (isMobile && pdfOnlyMobile) {
     return (
       <div className="document-chat-container" ref={containerRef}>
         <div className="pdf-section" style={{ width: '100%', height: '80vh', flex: '1 1 100%' }}>
-          <Worker workerUrl={pdfjsWorker}>
-            <Viewer
-              fileUrl={pdfUrl}
-              defaultScale={0.9}
-              initialPage={pageNumber - 1}
-              page={pageNumber - 1}
-              onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
-              onLoadError={(error) => console.error(`PDF load error for ${selectedDoc}:`, error)}
-            />
-          </Worker>
+          <PDFViewer selectedDoc={selectedDoc} pageNumber={pageNumber} isMobile={isMobile} pdfOnlyMobile={pdfOnlyMobile} />
         </div>
       </div>
     );
@@ -109,16 +123,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
           height: isMobile ? `${splitRatio}%` : 'auto'
         }}
       >
-        <Worker workerUrl={pdfjsWorker}>
-          <Viewer
-            fileUrl={pdfUrl}
-            defaultScale={isMobile ? 0.8 : 1.2}
-            initialPage={pageNumber - 1}
-            page={pageNumber - 1}
-            onDocumentLoad={(e) => console.log(`PDF loaded successfully: ${selectedDoc}`)}
-            onLoadError={(error) => console.error(`PDF load error for ${selectedDoc}:`, error)}
-          />
-        </Worker>
+        <PDFViewer selectedDoc={selectedDoc} pageNumber={pageNumber} isMobile={isMobile} pdfOnlyMobile={pdfOnlyMobile} />
       </div>
 
       <div
@@ -151,7 +156,7 @@ export default function DocumentChat({ selectedDoc, children, pageNumber = 1, pd
           height: isMobile ? `${100 - splitRatio}%` : 'auto'
         }}
       >
-        <div className="chat-content">
+        <div className="chat-content" ref={chatContentRef}>
           {children}
         </div>
       </div>
