@@ -1,0 +1,29 @@
+# Server-side deployment for document-search.
+# Pulls the prebuilt image from GitHub Container Registry (pushed by CI on every
+# master push) and runs the all-in-one container (nginx + uvicorn via supervisor).
+#
+# The container exposes ONLY port 8080 on the host (-> internal nginx :80).
+# The host nginx terminates TLS for gpt.medviberpro.com and proxies to :8080.
+# The backend's :8000 stays internal to the container and is never exposed.
+#
+# Usage on the server:
+#   1. cp .env.example .env   &&  edit .env  (set OPENAI_API_KEY)
+#   2. docker login ghcr.io   (one time, with a GitHub PAT that has read:packages)
+#   3. docker compose pull && docker compose up -d
+#   To update later:  docker compose pull && docker compose up -d
+
+services:
+  document-search:
+    image: ghcr.io/amolshinde76/gpt-midviber-mvp:latest
+    container_name: document-search
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      # host:container  -> host nginx will proxy gpt.medviberpro.com to 127.0.0.1:8080
+      - "127.0.0.1:8080:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
